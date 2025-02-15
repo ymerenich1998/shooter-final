@@ -31,7 +31,8 @@ class Player(GameSprite):
             self.rect.x += self.speed 
            
     def fire(self):
-        pass
+        bullet = Bullet("bullet.png", self.rect.centerx, self.rect.top, 15, 20, -15)
+        bullets.add(bullet)
 
 class Enemy(GameSprite):
     def update(self):
@@ -41,6 +42,12 @@ class Enemy(GameSprite):
             self.rect.x = randint(80, win_width - 80)
             self.rect.y = 0
             lost = lost + 1
+
+class Bullet(GameSprite):
+    def update(self):
+        self.rect.y += self.speed
+        if self.rect.y < 0:
+            self.kill()
             
 
 # ініціалізація Pygame:
@@ -55,16 +62,23 @@ mixer.init()
 mixer.music.load("space.ogg")
 mixer.music.play()
 
+fire_sound = mixer.Sound("fire.ogg")
+
 finish = False
 run = True
 clock = time.Clock()
 FPS = 60
 
 score = 0 # збито кораблів
+goal = 10 #Кількість кораблів
 lost = 0 # пропущено кораблів
+max_lost = 10 # максимальна кількість пропущених кораблів
 
 font.init()
 font1 = font.Font(None, 36)
+font2 = font.Font(None, 64)
+text_win = font2.render("Ви перемогли!", True, (255, 215, 0))
+text_lose = font2.render("Ви програли!", True, (180, 0, 0))
 
 ship = Player("rocket.png", 5, win_height - 100, 80, 100, 10)
 
@@ -73,10 +87,16 @@ for i in range(1, 6):
     monster = Enemy("ufo.png", randint(80, win_width - 80), 0, 80, 50, randint(1, 5))
     monsters.add(monster)
 
+bullets = sprite.Group()
+
 while run:
     for e in event.get():
         if e.type == QUIT:
             run = False
+        elif e.type == KEYDOWN:
+            if e.key == K_SPACE:
+                fire_sound.play()
+                ship.fire()
 
     if not finish:
         # Добавляємо фон
@@ -91,10 +111,27 @@ while run:
         # Рухаємо спрайти
         ship.update()
         monsters.update()
+        bullets.update()
 
         # Малюємо спрайти
         ship.reset()
         monsters.draw(window)
+        bullets.draw(window)
 
-    display.update()
+        # Перевірка зіткнення куль та монстрів
+        collides = sprite.groupcollide(monsters, bullets, True, True)
+        for c in collides:
+            score = score + 1
+            monster = Enemy("ufo.png", randint(80, win_width - 80), 0, 80, 50, randint(1, 5))
+            monsters.add(monster)
+        
+        if sprite.spritecollide(ship, monsters, False) or lost >= max_lost:
+            finish = True
+            window.blit(text_lose, (win_width // 2 - text_lose.get_width() // 2, win_height // 2 - text_lose.get_height() // 2))
+
+        if score >= goal:
+            finish = True
+            window.blit(text_win, (win_width // 2 - text_win.get_width() // 2, win_height // 2 - text_win.get_height() // 2))
+
+        display.update()
     clock.tick(FPS)
