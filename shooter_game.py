@@ -69,10 +69,11 @@ run = True
 clock = time.Clock()
 FPS = 60
 
+player_life = 3 # кількість життів
 score = 0 # збито кораблів
 goal = 10 #Кількість кораблів
 lost = 0 # пропущено кораблів
-max_lost = 10 # максимальна кількість пропущених кораблів
+max_lost = 100 # максимальна кількість пропущених кораблів
 
 font.init()
 font1 = font.Font(None, 36)
@@ -84,10 +85,15 @@ ship = Player("rocket.png", 5, win_height - 100, 80, 100, 10)
 
 monsters = sprite.Group()
 for i in range(1, 6):
-    monster = Enemy("ufo.png", randint(80, win_width - 80), 0, 80, 50, randint(1, 5))
+    monster = Enemy("ufo.png", randint(80, win_width - 80), 0, 80, 50, randint(1, 3))
     monsters.add(monster)
 
 bullets = sprite.Group()
+
+asteroids = sprite.Group()
+for i in range(1, 3):
+    asteroid = Enemy("asteroid.png", randint(80, win_width - 80), 0, 80, 50, randint(1, 3))
+    asteroids.add(asteroid)
 
 while run:
     for e in event.get():
@@ -112,22 +118,34 @@ while run:
         ship.update()
         monsters.update()
         bullets.update()
+        asteroids.update()
 
         # Малюємо спрайти
         ship.reset()
         monsters.draw(window)
         bullets.draw(window)
+        asteroids.draw(window)
 
         # Перевірка зіткнення куль та монстрів
         collides = sprite.groupcollide(monsters, bullets, True, True)
         for c in collides:
             score = score + 1
-            monster = Enemy("ufo.png", randint(80, win_width - 80), 0, 80, 50, randint(1, 5))
+            monster = Enemy("ufo.png", randint(80, win_width - 80), 0, 80, 50, randint(1, 3))
             monsters.add(monster)
         
         if sprite.spritecollide(ship, monsters, False) or lost >= max_lost:
             finish = True
             window.blit(text_lose, (win_width // 2 - text_lose.get_width() // 2, win_height // 2 - text_lose.get_height() // 2))
+
+        collides_asteroids = sprite.spritecollide(ship, asteroids, False)
+        for c in collides_asteroids:
+            if player_life > 1:
+               player_life = player_life - 1
+               c.rect.x = randint(80, win_width - 80)
+               c.rect.y = 0
+            else:
+                finish = True
+                window.blit(text_lose, (win_width // 2 - text_lose.get_width() // 2, win_height // 2 - text_lose.get_height() // 2))
 
         if score >= goal:
             finish = True
