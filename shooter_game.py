@@ -73,13 +73,17 @@ player_life = 3 # кількість життів
 score = 0 # збито кораблів
 goal = 10 #Кількість кораблів
 lost = 0 # пропущено кораблів
-max_lost = 100 # максимальна кількість пропущених кораблів
+max_lost = 10 # максимальна кількість пропущених кораблів
+num_fire = 0 # кількість пострілів
+rel_time = False # час відновлення
 
 font.init()
 font1 = font.Font(None, 36)
 font2 = font.Font(None, 64)
 text_win = font2.render("Ви перемогли!", True, (255, 215, 0))
 text_lose = font2.render("Ви програли!", True, (180, 0, 0))
+reload = font1.render("Підзарядка...", True, (255, 255, 255))
+
 
 ship = Player("rocket.png", 5, win_height - 100, 80, 100, 10)
 
@@ -101,8 +105,14 @@ while run:
             run = False
         elif e.type == KEYDOWN:
             if e.key == K_SPACE:
-                fire_sound.play()
-                ship.fire()
+                if num_fire < 5 and rel_time == False:
+                    num_fire = num_fire + 1
+                    ship.fire()
+                    fire_sound.play()
+                if num_fire >= 5 and rel_time == False:
+                    last_time = time.get_ticks()
+                    rel_time = True
+                
 
     if not finish:
         # Добавляємо фон
@@ -110,9 +120,19 @@ while run:
         
         text_score = font1.render("Рахунок: " + str(score), 1, (255, 255, 255))
         text_lost = font1.render("Пропущено: " + str(lost), 1, (255, 255, 255))
+        text_current_life = font1.render("Життя: " + str(player_life), 1, (255, 255, 255))
+
+        if rel_time == True:
+            now_time = time.get_ticks()
+            if now_time - last_time < 3000:
+                window.blit(reload, (win_width // 2 - reload.get_width() // 2, win_height - reload.get_height() - 10))
+            else:
+                num_fire = 0
+                rel_time = False
 
         window.blit(text_score, (10, 20))
         window.blit(text_lost, (10, 50))
+        window.blit(text_current_life, ((win_width - text_current_life.get_width() - 10), 20))
 
         # Рухаємо спрайти
         ship.update()
@@ -139,8 +159,8 @@ while run:
 
         collides_asteroids = sprite.spritecollide(ship, asteroids, False)
         for c in collides_asteroids:
-            if player_life > 1:
-               player_life = player_life - 1
+            player_life = player_life - 1
+            if player_life > 0:
                c.rect.x = randint(80, win_width - 80)
                c.rect.y = 0
             else:
