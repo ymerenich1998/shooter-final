@@ -78,8 +78,8 @@ num_fire = 0 # кількість пострілів
 rel_time = False # час відновлення
 
 font.init()
-font1 = font.Font(None, 36)
-font2 = font.Font(None, 64)
+font1 = font.SysFont("Arial",   )
+font2 = font.SysFont("Arial", 48)
 text_win = font2.render("Ви перемогли!", True, (255, 215, 0))
 text_lose = font2.render("Ви програли!", True, (180, 0, 0))
 reload = font1.render("Підзарядка...", True, (255, 255, 255))
@@ -124,7 +124,7 @@ while run:
 
         if rel_time == True:
             now_time = time.get_ticks()
-            if now_time - last_time < 3000:
+            if now_time - last_time < 2500:
                 window.blit(reload, (win_width // 2 - reload.get_width() // 2, win_height - reload.get_height() - 10))
             else:
                 num_fire = 0
