@@ -40,9 +40,8 @@ cd shooter-final
 
 2. Use the following controls to play:
 
-- Move: [insert controls, e.g., WASD or arrow keys]
+- Move: [insert controls, e.g., arrow keys]
 - Shoot: [insert control, e.g., Spacebar]
-- Pause: [insert control, e.g., P]
 
 ## Contributing
 
