@@ -78,7 +78,7 @@ num_fire = 0 # кількість пострілів
 rel_time = False # час відновлення
 
 font.init()
-font1 = font.SysFont("Arial",   )
+font1 = font.SysFont("Arial", 30)
 font2 = font.SysFont("Arial", 48)
 text_win = font2.render("Ви перемогли!", True, (255, 215, 0))
 text_lose = font2.render("Ви програли!", True, (180, 0, 0))
